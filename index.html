@@ -58,14 +58,8 @@
 
             <div class="sidebar-section sidebar-bottom">
                 <div class="sidebar-label">Quick Actions</div>
-                <button class="action-btn" data-action="tasks">
-                    <span class="action-icon">📋</span> My Tasks
-                </button>
-                <button class="action-btn" data-action="notes">
-                    <span class="action-icon">📝</span> My Notes
-                </button>
-                <button class="action-btn" data-action="calendar">
-                    <span class="action-icon">📅</span> My Calendar
+                <button class="action-btn" id="openApiSettingsBtn">
+                    <span class="action-icon">🔑</span> API Keys
                 </button>
                 <button class="action-btn danger" id="clearHistoryBtn">
                     <span class="action-icon">🗑️</span> Clear History
@@ -88,10 +82,13 @@
                     </span>
                 </div>
                 <div class="top-bar-actions">
+                    <button class="icon-btn" id="headerSettingsBtn" title="API Settings">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </button>
                     <div class="model-selector" id="modelSelector">
                         <select id="modelSelect">
-                            <option value="gemini">🌟 Gemini (Free)</option>
-                            <option value="openai">⚡ OpenAI GPT</option>
+                            <option value="gemini">🌟 Gemini (Direct API)</option>
+                            <option value="openai">⚡ OpenAI (via Backend)</option>
                         </select>
                     </div>
                 </div>
@@ -128,21 +125,9 @@
                             <span class="suggestion-icon">💻</span>
                             <span class="suggestion-text">Write Python code</span>
                         </button>
-                        <button class="suggestion-card" data-query="What are the best productivity tips for students?">
-                            <span class="suggestion-icon">📚</span>
-                            <span class="suggestion-text">Productivity tips</span>
-                        </button>
                         <button class="suggestion-card" data-query="Add a task to complete the project report by tomorrow">
                             <span class="suggestion-icon">✅</span>
                             <span class="suggestion-text">Add a task</span>
-                        </button>
-                        <button class="suggestion-card" data-query="Tell me a creative story about space exploration">
-                            <span class="suggestion-icon">🚀</span>
-                            <span class="suggestion-text">Tell me a story</span>
-                        </button>
-                        <button class="suggestion-card" data-query="What is the meaning of life according to different philosophies?">
-                            <span class="suggestion-icon">🌍</span>
-                            <span class="suggestion-text">Philosophy question</span>
                         </button>
                     </div>
                 </div>
@@ -179,15 +164,20 @@
     <div class="modal-overlay" id="apiKeyModal" style="display: none;">
         <div class="modal">
             <div class="modal-header">
-                <h3>🔑 Set Gemini API Key</h3>
+                <h3>🔑 API Settings</h3>
                 <button class="modal-close" id="modalClose">&times;</button>
             </div>
             <div class="modal-body">
-                <p>To use Gemini (free), get an API key from <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>.</p>
-                <input type="password" id="apiKeyInput" placeholder="Enter your Gemini API key..." class="modal-input">
-                <div class="modal-actions">
+                <p>Change your active API keys here. Your keys are stored locally and are never sent to our servers.</p>
+                
+                <div class="input-group">
+                    <label for="geminiApiKeyInput">Google Gemini API Key <a href="https://aistudio.google.com/apikey" target="_blank" style="font-size:0.75rem; float:right;">Get Key</a></label>
+                    <input type="password" id="geminiApiKeyInput" placeholder="Enter your Gemini API key..." class="modal-input">
+                </div>
+
+                <div class="modal-actions" style="margin-top: 24px;">
                     <button class="modal-btn secondary" id="modalCancel">Cancel</button>
-                    <button class="modal-btn primary" id="modalSave">Save Key</button>
+                    <button class="modal-btn primary" id="modalSave">Save Keys</button>
                 </div>
             </div>
         </div>

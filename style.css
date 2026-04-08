@@ -296,6 +296,24 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
     50% { opacity: 0.4; }
 }
 
+.top-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.icon-btn {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--text-tertiary);
+    transition: all var(--transition-fast);
+}
+.icon-btn:hover {
+    background: var(--glass-hover);
+    color: var(--text-primary);
+}
+
 .model-selector select {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
@@ -725,14 +743,25 @@ pre:hover .copy-btn { opacity: 1; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 18px;
+    margin-bottom: 24px;
 }
 .modal-header h3 { font-size: 1.1rem; font-weight: 700; }
 .modal-close { font-size: 1.5rem; color: var(--text-tertiary); padding: 4px; }
 .modal-close:hover { color: var(--text-primary); }
 
-.modal-body p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px; }
+.modal-body p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; }
 .modal-body a { color: var(--accent-1); }
+
+.input-group { margin-bottom: 16px; }
+.input-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
 
 .modal-input {
     width: 100%;
@@ -744,7 +773,6 @@ pre:hover .copy-btn { opacity: 1; }
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
     outline: none;
-    margin-bottom: 18px;
     transition: border-color var(--transition-fast);
 }
 .modal-input:focus { border-color: var(--accent-3); box-shadow: 0 0 0 3px var(--accent-glow); }

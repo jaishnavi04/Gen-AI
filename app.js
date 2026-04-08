@@ -28,8 +28,12 @@
     const chatTitle = $("#chatTitle");
     const statusBadge = $("#statusBadge");
     const clearHistoryBtn = $("#clearHistoryBtn");
+    const openApiSettingsBtn = $("#openApiSettingsBtn");
+    const headerSettingsBtn = $("#headerSettingsBtn");
+    
+    // API Modal Refs
     const apiKeyModal = $("#apiKeyModal");
-    const apiKeyInput = $("#apiKeyInput");
+    const geminiApiKeyInput = $("#geminiApiKeyInput");
     const modalClose = $("#modalClose");
     const modalCancel = $("#modalCancel");
     const modalSave = $("#modalSave");
@@ -38,7 +42,7 @@
     let chats = JSON.parse(localStorage.getItem("nexus_chats") || "{}");
     let activeChatId = localStorage.getItem("nexus_active_chat") || null;
     let isStreaming = false;
-    let geminiApiKey = localStorage.getItem("nexus_gemini_key") || "AIzaSyBibChm6DfV9eFSUPs2MoEJYJ-uMULx3PQ";
+    let geminiApiKey = localStorage.getItem("nexus_gemini_key") || "";
     let conversationHistory = []; // For Gemini context
 
     // ── Init ──────────────────────────────────────────────────────
@@ -51,6 +55,11 @@
             showWelcome();
         }
         autoResize();
+
+        // If no API key is set, prompt user
+        if (!geminiApiKey) {
+            setTimeout(showApiKeyModal, 500);
+        }
     }
 
     // ── Event Bindings ────────────────────────────────────────────
@@ -60,6 +69,10 @@
         newChatBtn.addEventListener("click", startNewChat);
         sendBtn.addEventListener("click", sendMessage);
         clearHistoryBtn.addEventListener("click", clearAllHistory);
+        
+        // API Settings
+        openApiSettingsBtn.addEventListener("click", showApiKeyModal);
+        headerSettingsBtn.addEventListener("click", showApiKeyModal);
 
         userInput.addEventListener("input", () => {
             autoResize();
@@ -83,37 +96,17 @@
             });
         });
 
-        // Quick actions
-        $$(".action-btn[data-action]").forEach((btn) => {
-            btn.addEventListener("click", () => {
-                const actionMap = {
-                    tasks: "Show all my tasks",
-                    notes: "Show all my notes",
-                    calendar: "Show my upcoming events",
-                };
-                userInput.value = actionMap[btn.dataset.action] || "";
-                userInput.dispatchEvent(new Event("input"));
-                sendMessage();
-            });
-        });
-
-        // Model select — prompt for API key if needed
+        // Model select — prompt for API key if switching to Gemini and none exists
         modelSelect.addEventListener("change", () => {
             if (modelSelect.value === "gemini" && !geminiApiKey) {
                 showApiKeyModal();
             }
         });
 
-        // Modal
+        // Modal actions
         modalClose.addEventListener("click", hideApiKeyModal);
         modalCancel.addEventListener("click", hideApiKeyModal);
-        modalSave.addEventListener("click", () => {
-            geminiApiKey = apiKeyInput.value.trim();
-            if (geminiApiKey) {
-                localStorage.setItem("nexus_gemini_key", geminiApiKey);
-                hideApiKeyModal();
-            }
-        });
+        modalSave.addEventListener("click", saveApiKeys);
 
         // Click outside sidebar on mobile
         document.addEventListener("click", (e) => {
@@ -275,10 +268,10 @@
     async function callGemini(query) {
         if (!geminiApiKey) {
             showApiKeyModal();
-            throw new Error("Please set your Gemini API key first (it's free!).");
+            throw new Error("API Key is missing. Please set your Gemini API key in settings.");
         }
 
-        const systemInstruction = `You are NexusAI, an extremely intelligent, knowledgeable, and helpful AI assistant. You can answer ANY question on ANY topic — science, math, coding, history, philosophy, creative writing, and more. Always provide thorough, accurate, and well-structured answers. Use markdown formatting for better readability. If you're not sure about something, say so honestly but still give your best analysis.`;
+        const systemInstruction = `You are NexusAI, an extremely intelligent, knowledgeable, and helpful AI assistant. You can answer ANY question on ANY topic. Focus on accuracy and clarity. Use markdown.`;
 
         const body = {
             system_instruction: {
@@ -303,10 +296,12 @@
 
         if (!res.ok) {
             const errData = await res.json().catch(() => ({}));
+            
             if (res.status === 400 && errData?.error?.message?.includes("API key")) {
-                localStorage.removeItem("nexus_gemini_key");
-                geminiApiKey = "";
-                throw new Error("Invalid API key. Please set a valid Gemini key.");
+                throw new Error("Invalid API key. Please check your Gemini API key in settings.");
+            }
+            if (res.status === 429) {
+                throw new Error("Rate limit exceeded or out of quota. Please check your API key quota.");
             }
             throw new Error(errData?.error?.message || `Gemini API error (${res.status})`);
         }
@@ -314,7 +309,7 @@
         const data = await res.json();
         const candidate = data?.candidates?.[0];
         if (!candidate?.content?.parts?.[0]?.text) {
-            throw new Error("Empty response from Gemini.");
+            throw new Error("Received an empty response from Gemini.");
         }
         return candidate.content.parts[0].text;
     }
@@ -323,7 +318,7 @@
         const res = await fetch(`${BACKEND_URL}/query`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: query, session: "web-ui" }),
+            body: JSON.stringify({ message: query, session: activeChatId }),
         });
 
         if (!res.ok) {
@@ -486,12 +481,25 @@
     // ── API Key Modal ─────────────────────────────────────────────
     function showApiKeyModal() {
         apiKeyModal.style.display = "flex";
-        apiKeyInput.value = geminiApiKey;
-        apiKeyInput.focus();
+        geminiApiKeyInput.value = geminiApiKey;
+        geminiApiKeyInput.focus();
     }
 
     function hideApiKeyModal() {
         apiKeyModal.style.display = "none";
+    }
+
+    function saveApiKeys() {
+        const newKey = geminiApiKeyInput.value.trim();
+        geminiApiKey = newKey;
+        localStorage.setItem("nexus_gemini_key", newKey);
+        
+        hideApiKeyModal();
+        
+        // Let the user know it was saved
+        const originalText = modalSave.textContent;
+        modalSave.textContent = "Saved ✓";
+        setTimeout(() => modalSave.textContent = originalText, 2000);
     }
 
     // ── Boot ──────────────────────────────────────────────────────
